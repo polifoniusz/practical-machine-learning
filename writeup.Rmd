@@ -1,0 +1,112 @@
+# Prediction Assignment Writeup
+
+The assignment was completed as follows.
+
+## Dataset inspection
+
+I started by inspecting the downloaded CSV file in a plain text viewer, to reach the following conclusions:
+* The first 7 columns are metadata
+* Many other columns contain data only in rows where *new_window == yes*, which makes them mostly empty.
+ 
+These columns will be removed from the dataset as they have little to no predictive power. 
+
+## Dataset import
+
+I've imported the CSV using the standard *read.csv* function:
+
+```{r}
+tr = read.csv('C:\\sync\\pml\\pml-training.csv',quote='')
+```
+
+Use of the *quote* parameter was necessary so that R would actually parse the CSV into separate columns.
+Without it, all lines were read as unparsed strings.
+
+The resulting data frame looked as follows (the printout is limited to initial columns as this is enough to highlight issues
+while not overloading this report).
+```{r}
+head(tr[,1:13])
+```
+
+## Dataset cleanup
+
+The cleanup included steps identified during inspection as well as ones needed to fix the non-ideal import result:
+
+* removal of metadata columns
+```{r}
+tr <- tr[,8:160]
+```
+
+* removal of unnecessary quotes
+```{r}
+tr[,which(!sapply(tr, is.numeric))] <- sapply(tr[,which(!sapply(tr, is.numeric))], function(x) gsub("\"", "", x))
+```
+Extra care had to be taken to avoid processing of numeric columns with the *gsub* function - as it converts them to character based.
+
+* removal of unnecessary characters from the headers (X and dots)
+```{r}
+names(tr) <- gsub("X|\\.","",names(tr))
+```
+
+* removal of columns which are mostly empty
+```{r}
+tr <- tr[,which(!sapply(tr, function(x) sum(is.na(x))>0 || x==''))]
+```
+The condition *is.na(x))>0 || x==''* was designed to catch columns where missing values were represented as NA as well as those with empty strings.
+
+
+The resulting data frame looked like this:
+```{r}
+head(tr)
+```
+
+## Classifier training
+
+I have chosen to use a Random Forest classifier for high accuracy and applied the *randomForest* package for this task:
+
+```{r}
+library(randomForest)
+r <- randomForest(formula = as.factor(classe) ~ ., data = tr)
+```
+
+The resulting classifier achieved the following performance:
+```{r}
+r
+```
+
+## Test set import and clean-up
+
+I handled the testing set CSV the same way as the training set CSV:
+
+```{r}
+ts = read.csv('C:\\sync\\pml\\pml-testing.csv',quote='')
+ts[,which(!sapply(ts, is.numeric))] <- sapply(ts[,which(!sapply(ts, is.numeric))], function(x) gsub("\"", "", x))
+names(ts) <- gsub("X|\\.","",names(ts))
+```
+
+Column removal steps were omited as the classifier is already trained to use the right subset.
+
+## Prediction
+
+Prediction was performed in a straight forward way, producing the following values:
+
+```{r}
+pr <- predict(r, ts)
+pr
+```
+
+## Output
+
+The results were saved to disk using the function provided at the course website.
+
+```{r}
+pml_write_files = function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0("C:\\sync\\pml\\problem_id_",i,".txt")
+    write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}
+pml_write_files(pr)
+```
+
+This produced a set of text files which I submitted one by one for a perfect score.
