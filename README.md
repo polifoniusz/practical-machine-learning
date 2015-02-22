@@ -208,15 +208,18 @@ r
 ##                      Number of trees: 500
 ## No. of variables tried at each split: 7
 ## 
-##         OOB estimate of  error rate: 0.28%
+##         OOB estimate of  error rate: 0.26%
 ## Confusion matrix:
 ##      A    B    C    D    E  class.error
-## A 5578    1    0    0    1 0.0003584229
-## B   10 3784    3    0    0 0.0034237556
+## A 5578    2    0    0    0 0.0003584229
+## B    9 3785    3    0    0 0.0031603898
 ## C    0   11 3410    1    0 0.0035067212
-## D    0    0   21 3193    2 0.0071517413
-## E    0    0    0    4 3603 0.0011089548
+## D    0    0   18 3196    2 0.0062189055
+## E    0    0    1    4 3602 0.0013861935
 ```
+
+Due to the nature of the Random Forest classifier, there is no need for further cross-validation.
+The reported out-of-bag (OOB) error rate estimate is the expected out of sample error.
 
 ## Test set import and clean-up
 
