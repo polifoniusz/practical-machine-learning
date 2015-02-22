@@ -73,6 +73,9 @@ The resulting classifier achieved the following performance:
 r
 ```
 
+Due to the nature of the Random Forest classifier, there is no need for further cross-validation.
+The reported out-of-bag (OOB) error rate estimate is the expected out of sample error.
+
 ## Test set import and clean-up
 
 I handled the testing set CSV the same way as the training set CSV:
