@@ -1,16 +1,16 @@
 # Prediction Assignment Writeup
 
-The assignment was completed in following steps:
+The assignment was completed as follows:
 
-1. Dataset inspection
+## Dataset inspection
 
-I've started by inspecting the downloaded CSV file in a plain text viewer, to reach the following conclusions:
+I started by inspecting the downloaded CSV file in a plain text viewer, to reach the following conclusions:
 * The first 7 columns are metadata.
-* Many columns contain data only in rows where new_window=yes, making them mostly empty.
+* Many columns contain data only in rows where new_window=yes, which makes them mostly empty.
  
 These columns will be removed from the dataset as they have little to no predictive power. 
 
-2. Dataset import
+## Dataset import
 
 I've imported the CSV using the standard *read.csv* function:
 
@@ -22,10 +22,11 @@ tr = read.csv('C:\\sync\\pml\\pml-training.csv',quote='')
 The *quote* parameter was necessary so that R would actually parse the CSV into separate columns.
 Without it, all lines were read as strings.
 
-The resulting data frame took the following form:
+The resulting data frame looked as follows (the printout is reduced to initial columns as this is enough to highlight issues
+while not overloading this report).
 
 ```r
-head(tr)
+head(tr[,1:13])
 ```
 
 ```
@@ -50,377 +51,20 @@ head(tr)
 ## 4            8.05         -94.4                     3
 ## 5            8.07         -94.4                     3
 ## 6            8.06         -94.4                     3
-##   X..kurtosis_roll_belt.. X..kurtosis_picth_belt.. X..kurtosis_yaw_belt..
-## 1                    """"                     """"                   """"
-## 2                    """"                     """"                   """"
-## 3                    """"                     """"                   """"
-## 4                    """"                     """"                   """"
-## 5                    """"                     """"                   """"
-## 6                    """"                     """"                   """"
-##   X..skewness_roll_belt.. X..skewness_roll_belt.1.. X..skewness_yaw_belt..
-## 1                    """"                      """"                   """"
-## 2                    """"                      """"                   """"
-## 3                    """"                      """"                   """"
-## 4                    """"                      """"                   """"
-## 5                    """"                      """"                   """"
-## 6                    """"                      """"                   """"
-##   X..max_roll_belt.. X..max_picth_belt.. X..max_yaw_belt..
-## 1                 NA                  NA              """"
-## 2                 NA                  NA              """"
-## 3                 NA                  NA              """"
-## 4                 NA                  NA              """"
-## 5                 NA                  NA              """"
-## 6                 NA                  NA              """"
-##   X..min_roll_belt.. X..min_pitch_belt.. X..min_yaw_belt..
-## 1                 NA                  NA              """"
-## 2                 NA                  NA              """"
-## 3                 NA                  NA              """"
-## 4                 NA                  NA              """"
-## 5                 NA                  NA              """"
-## 6                 NA                  NA              """"
-##   X..amplitude_roll_belt.. X..amplitude_pitch_belt..
-## 1                       NA                        NA
-## 2                       NA                        NA
-## 3                       NA                        NA
-## 4                       NA                        NA
-## 5                       NA                        NA
-## 6                       NA                        NA
-##   X..amplitude_yaw_belt.. X..var_total_accel_belt.. X..avg_roll_belt..
-## 1                    """"                        NA                 NA
-## 2                    """"                        NA                 NA
-## 3                    """"                        NA                 NA
-## 4                    """"                        NA                 NA
-## 5                    """"                        NA                 NA
-## 6                    """"                        NA                 NA
-##   X..stddev_roll_belt.. X..var_roll_belt.. X..avg_pitch_belt..
-## 1                    NA                 NA                  NA
-## 2                    NA                 NA                  NA
-## 3                    NA                 NA                  NA
-## 4                    NA                 NA                  NA
-## 5                    NA                 NA                  NA
-## 6                    NA                 NA                  NA
-##   X..stddev_pitch_belt.. X..var_pitch_belt.. X..avg_yaw_belt..
-## 1                     NA                  NA                NA
-## 2                     NA                  NA                NA
-## 3                     NA                  NA                NA
-## 4                     NA                  NA                NA
-## 5                     NA                  NA                NA
-## 6                     NA                  NA                NA
-##   X..stddev_yaw_belt.. X..var_yaw_belt.. X..gyros_belt_x..
-## 1                   NA                NA              0.00
-## 2                   NA                NA              0.02
-## 3                   NA                NA              0.00
-## 4                   NA                NA              0.02
-## 5                   NA                NA              0.02
-## 6                   NA                NA              0.02
-##   X..gyros_belt_y.. X..gyros_belt_z.. X..accel_belt_x.. X..accel_belt_y..
-## 1              0.00             -0.02               -21                 4
-## 2              0.00             -0.02               -22                 4
-## 3              0.00             -0.02               -20                 5
-## 4              0.00             -0.03               -22                 3
-## 5              0.02             -0.02               -21                 2
-## 6              0.00             -0.02               -21                 4
-##   X..accel_belt_z.. X..magnet_belt_x.. X..magnet_belt_y..
-## 1                22                 -3                599
-## 2                22                 -7                608
-## 3                23                 -2                600
-## 4                21                 -6                604
-## 5                24                 -6                600
-## 6                21                  0                603
-##   X..magnet_belt_z.. X..roll_arm.. X..pitch_arm.. X..yaw_arm..
-## 1               -313          -128           22.5         -161
-## 2               -311          -128           22.5         -161
-## 3               -305          -128           22.5         -161
-## 4               -310          -128           22.1         -161
-## 5               -302          -128           22.1         -161
-## 6               -312          -128           22.0         -161
-##   X..total_accel_arm.. X..var_accel_arm.. X..avg_roll_arm..
-## 1                   34                 NA                NA
-## 2                   34                 NA                NA
-## 3                   34                 NA                NA
-## 4                   34                 NA                NA
-## 5                   34                 NA                NA
-## 6                   34                 NA                NA
-##   X..stddev_roll_arm.. X..var_roll_arm.. X..avg_pitch_arm..
-## 1                   NA                NA                 NA
-## 2                   NA                NA                 NA
-## 3                   NA                NA                 NA
-## 4                   NA                NA                 NA
-## 5                   NA                NA                 NA
-## 6                   NA                NA                 NA
-##   X..stddev_pitch_arm.. X..var_pitch_arm.. X..avg_yaw_arm..
-## 1                    NA                 NA               NA
-## 2                    NA                 NA               NA
-## 3                    NA                 NA               NA
-## 4                    NA                 NA               NA
-## 5                    NA                 NA               NA
-## 6                    NA                 NA               NA
-##   X..stddev_yaw_arm.. X..var_yaw_arm.. X..gyros_arm_x.. X..gyros_arm_y..
-## 1                  NA               NA             0.00             0.00
-## 2                  NA               NA             0.02            -0.02
-## 3                  NA               NA             0.02            -0.02
-## 4                  NA               NA             0.02            -0.03
-## 5                  NA               NA             0.00            -0.03
-## 6                  NA               NA             0.02            -0.03
-##   X..gyros_arm_z.. X..accel_arm_x.. X..accel_arm_y.. X..accel_arm_z..
-## 1            -0.02             -288              109             -123
-## 2            -0.02             -290              110             -125
-## 3            -0.02             -289              110             -126
-## 4             0.02             -289              111             -123
-## 5             0.00             -289              111             -123
-## 6             0.00             -289              111             -122
-##   X..magnet_arm_x.. X..magnet_arm_y.. X..magnet_arm_z..
-## 1              -368               337               516
-## 2              -369               337               513
-## 3              -368               344               513
-## 4              -372               344               512
-## 5              -374               337               506
-## 6              -369               342               513
-##   X..kurtosis_roll_arm.. X..kurtosis_picth_arm.. X..kurtosis_yaw_arm..
-## 1                   """"                    """"                  """"
-## 2                   """"                    """"                  """"
-## 3                   """"                    """"                  """"
-## 4                   """"                    """"                  """"
-## 5                   """"                    """"                  """"
-## 6                   """"                    """"                  """"
-##   X..skewness_roll_arm.. X..skewness_pitch_arm.. X..skewness_yaw_arm..
-## 1                   """"                    """"                  """"
-## 2                   """"                    """"                  """"
-## 3                   """"                    """"                  """"
-## 4                   """"                    """"                  """"
-## 5                   """"                    """"                  """"
-## 6                   """"                    """"                  """"
-##   X..max_roll_arm.. X..max_picth_arm.. X..max_yaw_arm.. X..min_roll_arm..
-## 1                NA                 NA               NA                NA
-## 2                NA                 NA               NA                NA
-## 3                NA                 NA               NA                NA
-## 4                NA                 NA               NA                NA
-## 5                NA                 NA               NA                NA
-## 6                NA                 NA               NA                NA
-##   X..min_pitch_arm.. X..min_yaw_arm.. X..amplitude_roll_arm..
-## 1                 NA               NA                      NA
-## 2                 NA               NA                      NA
-## 3                 NA               NA                      NA
-## 4                 NA               NA                      NA
-## 5                 NA               NA                      NA
-## 6                 NA               NA                      NA
-##   X..amplitude_pitch_arm.. X..amplitude_yaw_arm.. X..roll_dumbbell..
-## 1                       NA                     NA           13.05217
-## 2                       NA                     NA           13.13074
-## 3                       NA                     NA           12.85075
-## 4                       NA                     NA           13.43120
-## 5                       NA                     NA           13.37872
-## 6                       NA                     NA           13.38246
-##   X..pitch_dumbbell.. X..yaw_dumbbell.. X..kurtosis_roll_dumbbell..
-## 1           -70.49400         -84.87394                        """"
-## 2           -70.63751         -84.71065                        """"
-## 3           -70.27812         -85.14078                        """"
-## 4           -70.39379         -84.87363                        """"
-## 5           -70.42856         -84.85306                        """"
-## 6           -70.81759         -84.46500                        """"
-##   X..kurtosis_picth_dumbbell.. X..kurtosis_yaw_dumbbell..
-## 1                         """"                       """"
-## 2                         """"                       """"
-## 3                         """"                       """"
-## 4                         """"                       """"
-## 5                         """"                       """"
-## 6                         """"                       """"
-##   X..skewness_roll_dumbbell.. X..skewness_pitch_dumbbell..
-## 1                        """"                         """"
-## 2                        """"                         """"
-## 3                        """"                         """"
-## 4                        """"                         """"
-## 5                        """"                         """"
-## 6                        """"                         """"
-##   X..skewness_yaw_dumbbell.. X..max_roll_dumbbell..
-## 1                       """"                     NA
-## 2                       """"                     NA
-## 3                       """"                     NA
-## 4                       """"                     NA
-## 5                       """"                     NA
-## 6                       """"                     NA
-##   X..max_picth_dumbbell.. X..max_yaw_dumbbell.. X..min_roll_dumbbell..
-## 1                      NA                  """"                     NA
-## 2                      NA                  """"                     NA
-## 3                      NA                  """"                     NA
-## 4                      NA                  """"                     NA
-## 5                      NA                  """"                     NA
-## 6                      NA                  """"                     NA
-##   X..min_pitch_dumbbell.. X..min_yaw_dumbbell..
-## 1                      NA                  """"
-## 2                      NA                  """"
-## 3                      NA                  """"
-## 4                      NA                  """"
-## 5                      NA                  """"
-## 6                      NA                  """"
-##   X..amplitude_roll_dumbbell.. X..amplitude_pitch_dumbbell..
-## 1                           NA                            NA
-## 2                           NA                            NA
-## 3                           NA                            NA
-## 4                           NA                            NA
-## 5                           NA                            NA
-## 6                           NA                            NA
-##   X..amplitude_yaw_dumbbell.. X..total_accel_dumbbell..
-## 1                        """"                        37
-## 2                        """"                        37
-## 3                        """"                        37
-## 4                        """"                        37
-## 5                        """"                        37
-## 6                        """"                        37
-##   X..var_accel_dumbbell.. X..avg_roll_dumbbell.. X..stddev_roll_dumbbell..
-## 1                      NA                     NA                        NA
-## 2                      NA                     NA                        NA
-## 3                      NA                     NA                        NA
-## 4                      NA                     NA                        NA
-## 5                      NA                     NA                        NA
-## 6                      NA                     NA                        NA
-##   X..var_roll_dumbbell.. X..avg_pitch_dumbbell..
-## 1                     NA                      NA
-## 2                     NA                      NA
-## 3                     NA                      NA
-## 4                     NA                      NA
-## 5                     NA                      NA
-## 6                     NA                      NA
-##   X..stddev_pitch_dumbbell.. X..var_pitch_dumbbell.. X..avg_yaw_dumbbell..
-## 1                         NA                      NA                    NA
-## 2                         NA                      NA                    NA
-## 3                         NA                      NA                    NA
-## 4                         NA                      NA                    NA
-## 5                         NA                      NA                    NA
-## 6                         NA                      NA                    NA
-##   X..stddev_yaw_dumbbell.. X..var_yaw_dumbbell.. X..gyros_dumbbell_x..
-## 1                       NA                    NA                     0
-## 2                       NA                    NA                     0
-## 3                       NA                    NA                     0
-## 4                       NA                    NA                     0
-## 5                       NA                    NA                     0
-## 6                       NA                    NA                     0
-##   X..gyros_dumbbell_y.. X..gyros_dumbbell_z.. X..accel_dumbbell_x..
-## 1                 -0.02                  0.00                  -234
-## 2                 -0.02                  0.00                  -233
-## 3                 -0.02                  0.00                  -232
-## 4                 -0.02                 -0.02                  -232
-## 5                 -0.02                  0.00                  -233
-## 6                 -0.02                  0.00                  -234
-##   X..accel_dumbbell_y.. X..accel_dumbbell_z.. X..magnet_dumbbell_x..
-## 1                    47                  -271                   -559
-## 2                    47                  -269                   -555
-## 3                    46                  -270                   -561
-## 4                    48                  -269                   -552
-## 5                    48                  -270                   -554
-## 6                    48                  -269                   -558
-##   X..magnet_dumbbell_y.. X..magnet_dumbbell_z.. X..roll_forearm..
-## 1                    293                    -65              28.4
-## 2                    296                    -64              28.3
-## 3                    298                    -63              28.3
-## 4                    303                    -60              28.1
-## 5                    292                    -68              28.0
-## 6                    294                    -66              27.9
-##   X..pitch_forearm.. X..yaw_forearm.. X..kurtosis_roll_forearm..
-## 1              -63.9             -153                       """"
-## 2              -63.9             -153                       """"
-## 3              -63.9             -152                       """"
-## 4              -63.9             -152                       """"
-## 5              -63.9             -152                       """"
-## 6              -63.9             -152                       """"
-##   X..kurtosis_picth_forearm.. X..kurtosis_yaw_forearm..
-## 1                        """"                      """"
-## 2                        """"                      """"
-## 3                        """"                      """"
-## 4                        """"                      """"
-## 5                        """"                      """"
-## 6                        """"                      """"
-##   X..skewness_roll_forearm.. X..skewness_pitch_forearm..
-## 1                       """"                        """"
-## 2                       """"                        """"
-## 3                       """"                        """"
-## 4                       """"                        """"
-## 5                       """"                        """"
-## 6                       """"                        """"
-##   X..skewness_yaw_forearm.. X..max_roll_forearm.. X..max_picth_forearm..
-## 1                      """"                    NA                     NA
-## 2                      """"                    NA                     NA
-## 3                      """"                    NA                     NA
-## 4                      """"                    NA                     NA
-## 5                      """"                    NA                     NA
-## 6                      """"                    NA                     NA
-##   X..max_yaw_forearm.. X..min_roll_forearm.. X..min_pitch_forearm..
-## 1                 """"                    NA                     NA
-## 2                 """"                    NA                     NA
-## 3                 """"                    NA                     NA
-## 4                 """"                    NA                     NA
-## 5                 """"                    NA                     NA
-## 6                 """"                    NA                     NA
-##   X..min_yaw_forearm.. X..amplitude_roll_forearm..
-## 1                 """"                          NA
-## 2                 """"                          NA
-## 3                 """"                          NA
-## 4                 """"                          NA
-## 5                 """"                          NA
-## 6                 """"                          NA
-##   X..amplitude_pitch_forearm.. X..amplitude_yaw_forearm..
-## 1                           NA                       """"
-## 2                           NA                       """"
-## 3                           NA                       """"
-## 4                           NA                       """"
-## 5                           NA                       """"
-## 6                           NA                       """"
-##   X..total_accel_forearm.. X..var_accel_forearm.. X..avg_roll_forearm..
-## 1                       36                     NA                    NA
-## 2                       36                     NA                    NA
-## 3                       36                     NA                    NA
-## 4                       36                     NA                    NA
-## 5                       36                     NA                    NA
-## 6                       36                     NA                    NA
-##   X..stddev_roll_forearm.. X..var_roll_forearm.. X..avg_pitch_forearm..
-## 1                       NA                    NA                     NA
-## 2                       NA                    NA                     NA
-## 3                       NA                    NA                     NA
-## 4                       NA                    NA                     NA
-## 5                       NA                    NA                     NA
-## 6                       NA                    NA                     NA
-##   X..stddev_pitch_forearm.. X..var_pitch_forearm.. X..avg_yaw_forearm..
-## 1                        NA                     NA                   NA
-## 2                        NA                     NA                   NA
-## 3                        NA                     NA                   NA
-## 4                        NA                     NA                   NA
-## 5                        NA                     NA                   NA
-## 6                        NA                     NA                   NA
-##   X..stddev_yaw_forearm.. X..var_yaw_forearm.. X..gyros_forearm_x..
-## 1                      NA                   NA                 0.03
-## 2                      NA                   NA                 0.02
-## 3                      NA                   NA                 0.03
-## 4                      NA                   NA                 0.02
-## 5                      NA                   NA                 0.02
-## 6                      NA                   NA                 0.02
-##   X..gyros_forearm_y.. X..gyros_forearm_z.. X..accel_forearm_x..
-## 1                 0.00                -0.02                  192
-## 2                 0.00                -0.02                  192
-## 3                -0.02                 0.00                  196
-## 4                -0.02                 0.00                  189
-## 5                 0.00                -0.02                  189
-## 6                -0.02                -0.03                  193
-##   X..accel_forearm_y.. X..accel_forearm_z.. X..magnet_forearm_x..
-## 1                  203                 -215                   -17
-## 2                  203                 -216                   -18
-## 3                  204                 -213                   -18
-## 4                  206                 -214                   -16
-## 5                  206                 -214                   -17
-## 6                  203                 -215                    -9
-##   X..magnet_forearm_y.. X..magnet_forearm_z.. X..classe...
-## 1                   654                   476       ""A"""
-## 2                   661                   473       ""A"""
-## 3                   658                   469       ""A"""
-## 4                   658                   469       ""A"""
-## 5                   655                   473       ""A"""
-## 6                   660                   478       ""A"""
+##   X..kurtosis_roll_belt.. X..kurtosis_picth_belt..
+## 1                    """"                     """"
+## 2                    """"                     """"
+## 3                    """"                     """"
+## 4                    """"                     """"
+## 5                    """"                     """"
+## 6                    """"                     """"
 ```
 
-3. Dataset cleanup
+## Dataset cleanup
 
-The necessary cleanup steps included these identified during inspection as well as extra ones that were needed to fix the non-ideal import result.
+The cleanup included steps identified during inspection as well as extra ones that were needed to fix the non-ideal import result.
 
-The resulting steps went as follows:
+The steps went as follows:
 
 * removal of metadata columns
 
@@ -542,7 +186,7 @@ head(tr)
 ## 6      A
 ```
 
-4. Classifier training
+## Classifier training
 
 I have chosen to use a Random Forest classifier for high accuracy and applied the *randomForest* package for this task:
 
@@ -566,19 +210,19 @@ r
 ##                      Number of trees: 500
 ## No. of variables tried at each split: 7
 ## 
-##         OOB estimate of  error rate: 0.29%
+##         OOB estimate of  error rate: 0.25%
 ## Confusion matrix:
 ##      A    B    C    D    E  class.error
-## A 5578    1    0    0    1 0.0003584229
-## B   12 3781    4    0    0 0.0042138530
-## C    0   10 3411    1    0 0.0032144944
-## D    0    0   22 3192    2 0.0074626866
-## E    0    0    0    3 3604 0.0008317161
+## A 5578    2    0    0    0 0.0003584229
+## B    9 3785    3    0    0 0.0031603898
+## C    0    8 3412    2    0 0.0029222677
+## D    0    0   19 3195    2 0.0065298507
+## E    0    0    0    4 3603 0.0011089548
 ```
 
 Out of the box, the classifier performance was very good, so I performed no further fine tuning.
 
-5. Test set import and clean-up
+## Test set import and clean-up
 
 The testing set CSV was handled in the same way as the training set CSV:
 
@@ -591,7 +235,7 @@ names(ts) <- gsub("X|\\.","",names(ts))
 
 Column removal steps were omited as the classifier is already trained to use the right subset.
 
-6. Prediction
+## Prediction
 
 Prediction was performed in a straight forward way, producing the following values:
 
@@ -607,7 +251,7 @@ pr
 ## Levels: A B C D E
 ```
 
-7. Output
+## Output
 
 The results were saved to disk using the function provided at the course website.
 
